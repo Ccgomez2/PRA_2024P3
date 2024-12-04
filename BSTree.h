@@ -17,7 +17,7 @@ class BSTree {
 			throw std::runtime_error("Elemento no encontrado en el árbol");
 		}else if(n->elem < e){
 			return search(n->right,e);
-		}else if(n->lem> e){
+		}else if(n->elem> e){
 			return search(n->left,e);
 		}else{
 			return n;
@@ -27,14 +27,17 @@ class BSTree {
 	    //Inserción elem
 	    BSNode<T>* insert(BSNode<T>* n, T e){
 	    	if(n== NULL){
+			++nelem;
 			return new BSNode<T>(e);
-		}else if(n->elem == e){
+		}
+		if(n->elem == e){
 			throw std::runtime_error("No se ha podido insertar en el árbol");
 		}else if(n->elem < e){
-			n.der = insert(n->right,e);
+			n->right = insert(n->right,e);
 		}else{
-			n.izq = insert (n->left,e);
+			n->left = insert (n->left,e);
 		}
+		return n; 
 	    }
 
 	    //Recorrido e impresión del arbol
@@ -47,49 +50,61 @@ class BSTree {
 	    }
 
 	    //Eliminación elem
+	    BSNode<T>* remove_max(BSNode<T>* n){
+                if (n->right == NULL){
+			BSNode<T>* temp = n->left;
+			delete n;
+			--nelem;
+			return temp;
+                }else{
+                        n->right = remove_max(n->right);
+                        return n;
+                }
+            }
+
 	    BSNode<T>* remove(BSNode<T>* n, T e){
-		    if (n == nullptr) {
+		    if (n == NULL) {
 		    	throw std::runtime_error("Elemento no encontrado");
 		    }else if (e < n->elem) {
 		    	n->left = remove(n->left, e);
 		    }else if (e > n->elem) {
 		    	n->right = remove(n->right, e);
 		    }else{
-		    	if (n->left == nullptr && n->right == nullptr) {
-				T maxValue;
-				n->left = remove_max(n->left, maxValue);
-				n->elem = maxValue;
-			}else if (n->left == nullptr) {
-				BSNode<T>* temp = (n->left != nullptr) ? n->left : n->right;
+		    	if (n->left == NULL && n->right == NULL) {
 				delete n;
+				--nelem;
+				return nullptr;
+			}else if (n->left == NULL) {
+				BSNode<T>* temp = n->right;
+				delete n;
+				--nelem;
 				return temp;
+			}else if (n->right == nullptr){
+				BSNode<T>* temp = n->left;
+				delete n;
+				--nelem;
+				return temp;
+			}else{
+				n->elem = max(n->left);
+				n->left = remove_max(n->left);
 			}
 		    }
 		    return n;
 	    }
 
 	    T max(BSNode<T>* n) const{
-	    	if (n == nullptr) {
+	    	if (n == NULL) {
                         throw std::runtime_error("Elemento no encontrado");
-		}else if(n->right != nullptr){
+		}else if(n->right != NULL){
 			return max(n->right);
 		}else{
 			return n->elem;
 		}
 	    }
 
-	    BSNode<T>* remove_max(BSNode<T>* n){
-	    	if (n-> right == NULL){
-			return n->left;
-		}else{
-			n->right = remove_max(n->right);
-			return n;
-		}
-	    }
-
 	    //Destrucción
 	    void delete_cascade(BSNode<T>* n){
-	    	if (n != nullptr) {
+	    	if (n != NULL) {
 			delete_cascade(n->left);
 			delete_cascade(n->right);
 			delete n;
@@ -98,7 +113,7 @@ class BSTree {
 
     public:
 	    //Creación y tamaño
-	    BSTree(): nelem(0),root(nullptr){}
+	    BSTree(): nelem(0),root(NULL){}
 	    int size() const{
 	    	return nelem;
 	    }
